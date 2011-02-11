@@ -1,19 +1,98 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script type="text/javascript" >
-         var clubs = [
-             { name: 'Benfica',  stadium: { name: "Estádio da Luz",      capacity: 65400 } },
-             { name: 'Porto',    stadium: { name: "Estádio do Dragão",   capacity: 52000 } },
-             { name: 'Sporting', stadium: { name: "Estádio de Alvalade", capacity: 50076 } }
-         ];
-        </script>
-    </head>
-    <body>
-        <h1>PrePROMPT</h1>
-        <h2>Desenvolvimento de Aplicações Web com jQuery</h2>
-        <h3>Etapa 0</h3>
-        
-        <div id="divclubs"></div>
-    </body>
+<head>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+        var clubs = [
+            { name: 'Benfica',  stadium: { name: "Estádio da Luz",      capacity: 65400 } },
+            { name: 'Porto',    stadium: { name: "Estádio do Dragão",   capacity: 52000 } },
+            { name: 'Sporting', stadium: { name: "Estádio de Alvalade", capacity: 50076 } }
+        ];
+
+        Array.prototype.each = function(action) {
+            for (var i = 0; i < this.length; ++i) {
+                action.call(this[i], this[i]);
+            }
+        };
+		
+        Array.prototype.where = function(filter) {
+            var res = [];
+            this.each(function() { 
+				if (filter.call(this, this)) {
+					res.push(this); 
+				}
+			});
+            return res;
+        };
+
+        Array.prototype.select = function(selector) {
+            var res = [];
+            this.each(function() {
+                res.push(selector.call(this, this)); 
+            });
+            return res;
+        };
+
+        Function.prototype.myBind = function(ctx) {
+            var thisthis = this;
+            return function() {
+                thisthis.apply(ctx, arguments);   
+            };
+        };
+		
+		/*
+		Object.prototype.tap = function(action) {
+			action.call(this, this);
+			return this;
+		};
+		
+        function onLoad() {
+			clubs.each(function(club) { 
+				document.getElementById("divclubs")
+					.appendChild(document.createElement("div"))
+					.tap(function() { this.onclick = function() { alert(this.stadium.capacity); }.myBind(club); })
+					.appendChild(document.createTextNode(this.name + ": " + this.stadium.name)); 
+			});
+			
+            clubs
+                .select(function() { return this.stadium })
+                .where(function() { return this.capacity > 60000 })
+                .each(function() { console.log(this.name); });
+        };
+		*/
+		
+		$.fn.coolAppend = function(arr, selector) {
+			$.each(arr, function(i, elem) { $(selector(elem)).appendTo(this); }.myBind(this));
+		};
+		
+		$(function() {
+			$("#divclubs").coolAppend(clubs, function(club) { 
+				return $("<div/>")
+					.text(club.name + ": " + club.stadium.name)
+					.append($("<div/>").text(club.stadium.capacity).hide())
+					.click(function() { $(this).children().first().slideToggle('slow'); })
+					.draggable();
+			});
+		});
+		
+		(function(older) {
+			console.log = function() {
+				older.apply(this, arguments);
+				older.apply(this, arguments);
+			};
+		})(console.log)
+		
+		console.log("aaa");
+    </script>
+</head>
+<body>
+<h1>PrePROMPT</h1>
+
+<h2>Desenvolvimento de Aplicações Web com jQuery</h2>                               
+
+<h3>Etapa 0</h3>
+
+<div id="divclubs"></div>
+</body>
 </html>
